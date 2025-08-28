@@ -64,8 +64,8 @@ class _AddEditProdutoPageState extends State<AddEditProdutoPage> {
     }
   }
 
+  // --- FUNÇÃO DE EXCLUSÃO DE PRODUTO ---
   void _deleteProduto() {
-    // Adiciona um diálogo de confirmação para segurança
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -94,6 +94,7 @@ class _AddEditProdutoPageState extends State<AddEditProdutoPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? 'Editar Produto' : 'Adicionar Produto'),
+        // --- BOTÃO DE EXCLUSÃO DE PRODUTO ---
         actions: [
           if (_isEditing)
             IconButton(
@@ -106,7 +107,6 @@ class _AddEditProdutoPageState extends State<AddEditProdutoPage> {
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          // Usa ListView para evitar que o teclado cubra os campos
           child: ListView(
             children: [
               TextFormField(
@@ -125,7 +125,6 @@ class _AddEditProdutoPageState extends State<AddEditProdutoPage> {
                     : null,
               ),
               const SizedBox(height: 16),
-              // Campos de preço em uma linha
               Row(
                 children: [
                   Expanded(

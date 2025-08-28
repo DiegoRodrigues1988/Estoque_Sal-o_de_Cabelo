@@ -9,7 +9,6 @@ import 'package:intl/intl.dart';
 class EstoquePage extends StatelessWidget {
   const EstoquePage({super.key});
 
-  // --- NOVA FUNÇÃO PARA MOSTRAR O DIÁLOGO DE VENDA ---
   void _mostrarDialogoDeVenda(BuildContext context, Produto produto) {
     final quantidadeController = TextEditingController(text: '1');
     final formKey = GlobalKey<FormState>();
@@ -17,7 +16,7 @@ class EstoquePage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Registrar Venda / Uso'),
+        title: const Text('Registrar Venda / Uso'),
         content: Form(
           key: formKey,
           child: TextFormField(
@@ -47,20 +46,17 @@ class EstoquePage extends StatelessWidget {
               if (formKey.currentState!.validate()) {
                 final quantidade = int.parse(quantidadeController.text);
 
-                // Usamos listen: false aqui porque estamos dentro de uma função
                 final vendaProvider =
                     Provider.of<VendaProvider>(context, listen: false);
                 final produtoProvider =
                     Provider.of<ProdutoProvider>(context, listen: false);
 
-                // Chama o método para registrar a venda
                 vendaProvider.registrarVenda(produto, quantidade).then((_) {
-                  // Atualiza a lista de produtos para refletir o novo estoque
                   produtoProvider.loadProdutos();
-                  Navigator.of(ctx).pop(); // Fecha o diálogo
+                  Navigator.of(ctx).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                        content: Text('Venda registrada com sucesso!'),
+                        content: Text('Venda registrada!'),
                         backgroundColor: Colors.green),
                   );
                 });
@@ -68,6 +64,31 @@ class EstoquePage extends StatelessWidget {
             },
             child: const Text('Confirmar'),
           )
+        ],
+      ),
+    );
+  }
+
+  // --- NOVA FUNÇÃO PARA CONFIRMAR A EXCLUSÃO DO PRODUTO ---
+  void _confirmarExclusao(BuildContext context, Produto produto) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmar Exclusão'),
+        content: Text('Tem certeza que deseja excluir "${produto.nome}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Provider.of<ProdutoProvider>(context, listen: false)
+                  .deleteProduto(produto);
+              Navigator.of(ctx).pop();
+            },
+            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+          ),
         ],
       ),
     );
@@ -107,13 +128,33 @@ class EstoquePage extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text(
                         'Venda: ${formatadorMoeda.format(produto.precoVenda)}'),
-                    trailing: Text('Qtd: ${produto.quantidade}',
-                        style: TextStyle(
-                            color: corQuantidade,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold)),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Qtd: ${produto.quantidade}',
+                            style: TextStyle(
+                                color: corQuantidade,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold)),
+                        // --- BOTÃO DE LIXEIRA ADICIONADO AQUI ---
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline,
+                              color: Colors.redAccent),
+                          onPressed: () => _confirmarExclusao(context, produto),
+                        ),
+                      ],
+                    ),
+                    onLongPress: () {
+                      // Mantém a edição com um toque longo
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) =>
+                                AddEditProdutoPage(produto: produto)),
+                      );
+                    },
                     onTap: () => _mostrarDialogoDeVenda(
-                        context, produto), // Ação ao tocar
+                        context, produto), // Venda com um toque rápido
                   ),
                 );
               },
