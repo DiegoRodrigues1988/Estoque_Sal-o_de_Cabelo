@@ -22,33 +22,33 @@ class ProdutoProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addProduto(String nome, String categoria, int quantidade) async {
-    final produtoExistente = _produtos.cast<Produto?>().firstWhere(
-        (p) =>
-            p!.nome.toLowerCase() == nome.toLowerCase() &&
-            p.categoria.toLowerCase() == categoria.toLowerCase(),
-        orElse: () => null);
+  // MÉTODO CORRIGIDO para incluir os preços
+  Future<void> addProduto(String nome, String categoria, int quantidade,
+      double precoCusto, double precoVenda) async {
+    // A lógica que soma a quantidade se o produto já existe foi movida para a tela de venda
+    // para simplificar o cadastro. Aqui, sempre criamos um novo produto.
+    final novoProduto = Produto(
+      id: const Uuid().v4(),
+      nome: nome,
+      categoria: categoria,
+      quantidade: quantidade,
+      precoCusto: precoCusto,
+      precoVenda: precoVenda,
+    );
+    await _produtosBox.put(novoProduto.id, novoProduto);
 
-    if (produtoExistente != null) {
-      produtoExistente.quantidade += quantidade;
-      await produtoExistente.save();
-    } else {
-      final novoProduto = Produto(
-        id: const Uuid().v4(),
-        nome: nome,
-        categoria: categoria,
-        quantidade: quantidade,
-      );
-      await _produtosBox.put(novoProduto.id, novoProduto);
-    }
     loadProdutos();
   }
 
-  Future<void> updateProduto(
-      Produto produto, String nome, String categoria, int quantidade) async {
+  // MÉTODO CORRIGIDO para atualizar todos os campos
+  Future<void> updateProduto(Produto produto, String nome, String categoria,
+      int quantidade, double precoCusto, double precoVenda) async {
     produto.nome = nome;
     produto.categoria = categoria;
     produto.quantidade = quantidade;
+    produto.precoCusto = precoCusto;
+    produto.precoVenda = precoVenda;
+
     await produto.save();
     loadProdutos();
   }

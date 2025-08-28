@@ -16,8 +16,10 @@ class _AddEditProdutoPageState extends State<AddEditProdutoPage> {
   late TextEditingController _nomeController;
   late TextEditingController _categoriaController;
   late TextEditingController _quantidadeController;
+  late TextEditingController _custoController;
+  late TextEditingController _vendaController;
+
   bool get _isEditing => widget.produto != null;
-  bool get _isAddingToStock => _isEditing; // Para clareza da lógica
 
   @override
   void initState() {
@@ -25,8 +27,12 @@ class _AddEditProdutoPageState extends State<AddEditProdutoPage> {
     _nomeController = TextEditingController(text: widget.produto?.nome ?? '');
     _categoriaController =
         TextEditingController(text: widget.produto?.categoria ?? '');
-    // Se estiver editando, o campo de quantidade começa zerado para adicionar ao estoque
-    _quantidadeController = TextEditingController(text: _isEditing ? '0' : '');
+    _quantidadeController = TextEditingController(
+        text: widget.produto?.quantidade.toString() ?? '');
+    _custoController = TextEditingController(
+        text: widget.produto?.precoCusto.toString() ?? '');
+    _vendaController = TextEditingController(
+        text: widget.produto?.precoVenda.toString() ?? '');
   }
 
   @override
@@ -34,6 +40,8 @@ class _AddEditProdutoPageState extends State<AddEditProdutoPage> {
     _nomeController.dispose();
     _categoriaController.dispose();
     _quantidadeController.dispose();
+    _custoController.dispose();
+    _vendaController.dispose();
     super.dispose();
   }
 
@@ -42,30 +50,50 @@ class _AddEditProdutoPageState extends State<AddEditProdutoPage> {
       final provider = Provider.of<ProdutoProvider>(context, listen: false);
       final nome = _nomeController.text;
       final categoria = _categoriaController.text;
-      final quantidade = int.parse(_quantidadeController.text);
+      final quantidade = int.tryParse(_quantidadeController.text) ?? 0;
+      final custo = double.tryParse(_custoController.text) ?? 0.0;
+      final venda = double.tryParse(_vendaController.text) ?? 0.0;
 
-      if (_isAddingToStock) {
-        // A lógica de adicionar ao estoque já está no provider (addProduto)
-        provider.addProduto(nome, categoria, quantidade);
+      if (_isEditing) {
+        provider.updateProduto(
+            widget.produto!, nome, categoria, quantidade, custo, venda);
       } else {
-        provider.addProduto(nome, categoria, quantidade);
+        provider.addProduto(nome, categoria, quantidade, custo, venda);
       }
       Navigator.pop(context);
     }
   }
 
   void _deleteProduto() {
-    Provider.of<ProdutoProvider>(context, listen: false)
-        .deleteProduto(widget.produto!);
-    Navigator.pop(context);
+    // Adiciona um diálogo de confirmação para segurança
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmar Exclusão'),
+        content: const Text('Tem certeza que deseja excluir este produto?'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () {
+              Provider.of<ProdutoProvider>(context, listen: false)
+                  .deleteProduto(widget.produto!);
+              Navigator.of(ctx).pop(); // Fecha o diálogo
+              Navigator.of(context).pop(); // Volta para a tela anterior
+            },
+            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            _isEditing ? 'Editar / Adicionar Estoque' : 'Adicionar Produto'),
+        title: Text(_isEditing ? 'Editar Produto' : 'Adicionar Produto'),
         actions: [
           if (_isEditing)
             IconButton(
@@ -78,8 +106,8 @@ class _AddEditProdutoPageState extends State<AddEditProdutoPage> {
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          // Usa ListView para evitar que o teclado cubra os campos
+          child: ListView(
             children: [
               TextFormField(
                 controller: _nomeController,
@@ -97,29 +125,61 @@ class _AddEditProdutoPageState extends State<AddEditProdutoPage> {
                     : null,
               ),
               const SizedBox(height: 16),
+              // Campos de preço em uma linha
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _custoController,
+                      decoration:
+                          const InputDecoration(labelText: 'Preço Custo (R\$)'),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      validator: (value) {
+                        if (value == null || value.isEmpty)
+                          return 'Obrigatório';
+                        if (double.tryParse(value) == null)
+                          return 'Número inválido';
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _vendaController,
+                      decoration:
+                          const InputDecoration(labelText: 'Preço Venda (R\$)'),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      validator: (value) {
+                        if (value == null || value.isEmpty)
+                          return 'Obrigatório';
+                        if (double.tryParse(value) == null)
+                          return 'Número inválido';
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _quantidadeController,
-                decoration: InputDecoration(
-                  labelText: _isAddingToStock
-                      ? 'Adicionar Quantidade'
-                      : 'Quantidade Inicial',
-                  hintText: _isAddingToStock
-                      ? 'Estoque atual: ${widget.produto!.quantidade}'
-                      : '',
-                ),
+                decoration:
+                    const InputDecoration(labelText: 'Quantidade em Estoque'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
-                  if (value == null || value.isEmpty)
-                    return 'Campo obrigatório';
+                  if (value == null || value.isEmpty) return 'Obrigatório';
                   if (int.tryParse(value) == null) return 'Número inválido';
                   return null;
                 },
               ),
-              const Spacer(),
+              const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _saveForm,
                 child: Text(
-                    _isEditing ? 'Atualizar Estoque' : 'Adicionar Produto'),
+                    _isEditing ? 'Salvar Alterações' : 'Adicionar Produto'),
               ),
             ],
           ),
