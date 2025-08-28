@@ -16,12 +16,15 @@ class Produto extends HiveObject {
   @HiveField(3)
   int quantidade;
 
-  // NOVOS CAMPOS ADICIONADOS
   @HiveField(4)
   double precoCusto;
 
   @HiveField(5)
   double precoVenda;
+
+  // --- NOVO CAMPO ADICIONADO ---
+  @HiveField(6)
+  DateTime dataAdicao;
 
   Produto({
     required this.id,
@@ -30,5 +33,6 @@ class Produto extends HiveObject {
     required this.quantidade,
     required this.precoCusto,
     required this.precoVenda,
+    required this.dataAdicao, // Adicionado ao construtor
   });
 }

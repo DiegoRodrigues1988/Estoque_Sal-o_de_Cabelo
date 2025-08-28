@@ -22,11 +22,8 @@ class ProdutoProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // MÉTODO CORRIGIDO para incluir os preços
   Future<void> addProduto(String nome, String categoria, int quantidade,
       double precoCusto, double precoVenda) async {
-    // A lógica que soma a quantidade se o produto já existe foi movida para a tela de venda
-    // para simplificar o cadastro. Aqui, sempre criamos um novo produto.
     final novoProduto = Produto(
       id: const Uuid().v4(),
       nome: nome,
@@ -34,13 +31,12 @@ class ProdutoProvider with ChangeNotifier {
       quantidade: quantidade,
       precoCusto: precoCusto,
       precoVenda: precoVenda,
+      dataAdicao: DateTime.now(), // <-- DATA E HORA SÃO REGISTRADAS AQUI
     );
     await _produtosBox.put(novoProduto.id, novoProduto);
-
     loadProdutos();
   }
 
-  // MÉTODO CORRIGIDO para atualizar todos os campos
   Future<void> updateProduto(Produto produto, String nome, String categoria,
       int quantidade, double precoCusto, double precoVenda) async {
     produto.nome = nome;
@@ -48,6 +44,7 @@ class ProdutoProvider with ChangeNotifier {
     produto.quantidade = quantidade;
     produto.precoCusto = precoCusto;
     produto.precoVenda = precoVenda;
+    // A data de adição não é alterada na edição
 
     await produto.save();
     loadProdutos();

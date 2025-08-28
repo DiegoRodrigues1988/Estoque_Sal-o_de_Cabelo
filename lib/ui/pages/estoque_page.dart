@@ -9,6 +9,9 @@ import 'package:intl/intl.dart';
 class EstoquePage extends StatelessWidget {
   const EstoquePage({super.key});
 
+  // --- FUNÇÕES DE LÓGICA DA PÁGINA (ESTAVAM FALTANDO) ---
+
+  // Função para abrir a janela de registro de venda
   void _mostrarDialogoDeVenda(BuildContext context, Produto produto) {
     final quantidadeController = TextEditingController(text: '1');
     final formKey = GlobalKey<FormState>();
@@ -69,7 +72,7 @@ class EstoquePage extends StatelessWidget {
     );
   }
 
-  // --- NOVA FUNÇÃO PARA CONFIRMAR A EXCLUSÃO DO PRODUTO ---
+  // Função para abrir a janela de confirmação de exclusão
   void _confirmarExclusao(BuildContext context, Produto produto) {
     showDialog(
       context: context,
@@ -127,16 +130,21 @@ class EstoquePage extends StatelessWidget {
                     title: Text(produto.nome,
                         style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text(
-                        'Venda: ${formatadorMoeda.format(produto.precoVenda)}'),
+                        'Adicionado em: ${DateFormat('dd/MM/yy HH:mm').format(produto.dataAdicao)}'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Qtd: ${produto.quantidade}',
-                            style: TextStyle(
-                                color: corQuantidade,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold)),
-                        // --- BOTÃO DE LIXEIRA ADICIONADO AQUI ---
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(formatadorMoeda.format(produto.precoVenda),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold)),
+                            Text('Qtd: ${produto.quantidade}',
+                                style: TextStyle(color: corQuantidade)),
+                          ],
+                        ),
                         IconButton(
                           icon: const Icon(Icons.delete_outline,
                               color: Colors.redAccent),
@@ -145,7 +153,6 @@ class EstoquePage extends StatelessWidget {
                       ],
                     ),
                     onLongPress: () {
-                      // Mantém a edição com um toque longo
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -153,8 +160,7 @@ class EstoquePage extends StatelessWidget {
                                 AddEditProdutoPage(produto: produto)),
                       );
                     },
-                    onTap: () => _mostrarDialogoDeVenda(
-                        context, produto), // Venda com um toque rápido
+                    onTap: () => _mostrarDialogoDeVenda(context, produto),
                   ),
                 );
               },

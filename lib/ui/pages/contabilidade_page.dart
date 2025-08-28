@@ -7,18 +7,59 @@ import 'package:estoque_salao_de_cabelo/ui/theme/app_theme.dart';
 class ContabilidadePage extends StatelessWidget {
   const ContabilidadePage({super.key});
 
+  // --- NOVA FUNÇÃO PARA CONFIRMAR A LIMPEZA ---
+  void _confirmarLimpeza(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmar Limpeza'),
+        content: const Text(
+            'Tem certeza que deseja apagar todo o histórico de vendas? Esta ação não pode ser desfeita.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Provider.of<VendaProvider>(context, listen: false)
+                  .limparHistoricoVendas();
+              Navigator.of(ctx).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Histórico de contabilidade limpo!'),
+                    backgroundColor: Colors.green),
+              );
+            },
+            child:
+                const Text('Limpar Tudo', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final formatadorMoeda =
         NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Contabilidade')),
+      appBar: AppBar(
+        title: const Text('Contabilidade'),
+        // --- BOTÃO DE LIMPAR ADICIONADO AQUI ---
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.cleaning_services_outlined),
+            tooltip: 'Limpar histórico',
+            onPressed: () => _confirmarLimpeza(context),
+          ),
+        ],
+      ),
       body: Consumer<VendaProvider>(
         builder: (context, provider, child) {
           return Column(
             children: [
-              // --- PAINEL DE RESUMO ---
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Card(
@@ -44,15 +85,14 @@ class ContabilidadePage extends StatelessWidget {
                   ),
                 ),
               ),
-
               const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text('Histórico de Vendas',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('Histórico de Vendas',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold))),
               ),
-
-              // --- LISTA DE VENDAS ---
               Expanded(
                 child: provider.vendas.isEmpty
                     ? const Center(child: Text('Nenhuma venda registrada.'))
