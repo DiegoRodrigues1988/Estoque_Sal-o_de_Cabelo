@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/date_symbol_data_local.dart'; // <-- 1. IMPORTAR ESTA LINHA
 
 // Models
 import 'package:estoque_salao_de_cabelo/models/cliente_model.dart';
@@ -17,21 +18,21 @@ import 'package:estoque_salao_de_cabelo/ui/pages/home_page.dart';
 import 'package:estoque_salao_de_cabelo/ui/theme/app_theme.dart';
 
 void main() async {
-  // Garante que o Flutter está inicializado antes de usar plugins
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializa o Hive para armazenamento local
+  // --- CORREÇÃO AQUI ---
+  // 2. INICIALIZAR A FORMATAÇÃO DE DATAS PARA O NOSSO IDIOMA
+  await initializeDateFormatting('pt_BR', null);
+
   await Hive.initFlutter();
 
-  // Registra os adaptadores para cada modelo de dados
   Hive.registerAdapter(ClienteAdapter());
   Hive.registerAdapter(ProdutoAdapter());
-  Hive.registerAdapter(VendaAdapter()); // Adicionado o adaptador de Venda
+  Hive.registerAdapter(VendaAdapter());
 
-  // Abre as "caixas" (tabelas) do banco de dados
   await Hive.openBox<Cliente>('clientes');
   await Hive.openBox<Produto>('produtos');
-  await Hive.openBox<Venda>('vendas'); // Adicionada a caixa de Vendas
+  await Hive.openBox<Venda>('vendas');
 
   runApp(const MyApp());
 }
@@ -41,13 +42,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // MultiProvider disponibiliza os providers para toda a árvore de widgets do app
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ClienteProvider()),
         ChangeNotifierProvider(create: (_) => ProdutoProvider()),
-        ChangeNotifierProvider(
-            create: (_) => VendaProvider()), // Adicionado o VendaProvider
+        ChangeNotifierProvider(create: (_) => VendaProvider()),
       ],
       child: MaterialApp(
         title: 'Gestor de Salão',

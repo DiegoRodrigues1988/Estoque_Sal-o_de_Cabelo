@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:estoque_salao_de_cabelo/ui/pages/clientes_page.dart';
 import 'package:estoque_salao_de_cabelo/ui/pages/estoque_page.dart';
-import 'package:estoque_salao_de_cabelo/ui/pages/contabilidade_page.dart'; // <-- IMPORTAR A NOVA PÁGINA
+import 'package:estoque_salao_de_cabelo/ui/pages/contabilidade_page.dart';
+import 'package:estoque_salao_de_cabelo/ui/pages/agenda_page.dart'; // Importação da página de agenda
 import 'package:estoque_salao_de_cabelo/ui/theme/app_theme.dart';
 
 class HomePage extends StatelessWidget {
@@ -32,13 +33,20 @@ class HomePage extends StatelessWidget {
               onTap: () => Navigator.push(context,
                   MaterialPageRoute(builder: (_) => const EstoquePage())),
             ),
-            // --- NOVO CARD ADICIONADO AQUI ---
             _buildMenuCard(
               context,
               icon: Icons.monetization_on_outlined,
               label: 'Contabilidade',
               onTap: () => Navigator.push(context,
                   MaterialPageRoute(builder: (_) => const ContabilidadePage())),
+            ),
+            // --- VERIFIQUE SE ESTE BOTÃO ESTÁ AQUI ---
+            _buildMenuCard(
+              context,
+              icon: Icons.calendar_month_outlined,
+              label: 'Agenda',
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const AgendaPage())),
             ),
           ],
         ),
