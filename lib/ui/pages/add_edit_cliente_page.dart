@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:estoque_salao_de_cabelo/models/cliente_model.dart';
 import 'package:estoque_salao_de_cabelo/providers/cliente_provider.dart';
+import 'package:estoque_salao_de_cabelo/providers/agendamento_provider.dart';
 
 class AddEditClientePage extends StatefulWidget {
   final Cliente? cliente;
@@ -46,9 +47,28 @@ class _AddEditClientePageState extends State<AddEditClientePage> {
   }
 
   void _deleteCliente() {
-    Provider.of<ClienteProvider>(context, listen: false)
-        .deleteCliente(widget.cliente!);
-    Navigator.pop(context);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmar Exclusão'),
+        content:
+            Text('Tem certeza que deseja excluir "${widget.cliente!.nome}"?'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () {
+              Provider.of<ClienteProvider>(context, listen: false)
+                  .deleteCliente(widget.cliente!);
+              Navigator.of(ctx).pop();
+              Navigator.of(context).pop();
+            },
+            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _confirmarVisita() {
@@ -57,6 +77,46 @@ class _AddEditClientePageState extends State<AddEditClientePage> {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Visita registrada!'), backgroundColor: Colors.green));
     Navigator.pop(context);
+  }
+
+  // --- Função para agendar ---
+  Future<void> _agendarHorario() async {
+    final dataSelecionada = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now().subtract(
+          const Duration(days: 1)), // Permite agendar para ontem, se necessário
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+
+    if (dataSelecionada == null || !mounted) return;
+
+    final horaSelecionada = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (horaSelecionada == null) return;
+
+    final dataHoraFinal = DateTime(
+      dataSelecionada.year,
+      dataSelecionada.month,
+      dataSelecionada.day,
+      horaSelecionada.hour,
+      horaSelecionada.minute,
+    );
+
+    final provider = Provider.of<AgendamentoProvider>(context, listen: false);
+    await provider.addAgendamento(widget.cliente!, dataHoraFinal);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Cliente agendado com sucesso!'),
+            backgroundColor: Colors.green),
+      );
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -95,22 +155,39 @@ class _AddEditClientePageState extends State<AddEditClientePage> {
                     ? 'Campo obrigatório'
                     : null,
               ),
-              const Spacer(),
-              if (_isEditing)
+              const Spacer(), // Empurra os botões para baixo
+
+              // --- BOTÕES QUE SÓ APARECEM AO EDITAR ---
+              if (_isEditing) ...[
+                ElevatedButton.icon(
+                  onPressed: _agendarHorario,
+                  icon: const Icon(Icons.calendar_month),
+                  label: const Text('Agendar Horário Futuro'),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor),
+                ),
+                const SizedBox(height: 12),
                 OutlinedButton.icon(
                   onPressed: _confirmarVisita,
                   icon: const Icon(Icons.check),
-                  label: const Text('Confirmar Visita Hoje'),
+                  label: const Text('Confirmar Visita de Hoje'),
                   style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.green,
                       side: const BorderSide(color: Colors.green),
                       padding: const EdgeInsets.symmetric(vertical: 16)),
                 ),
-              const SizedBox(height: 12),
+                const SizedBox(height: 12),
+              ],
+
               ElevatedButton(
                 onPressed: _saveForm,
                 child: Text(
                     _isEditing ? 'Salvar Alterações' : 'Adicionar Cliente'),
+                style: ElevatedButton.styleFrom(
+                  // Muda o estilo do botão principal para não competir com o de agendar
+                  backgroundColor:
+                      _isEditing ? null : Theme.of(context).primaryColor,
+                ),
               ),
             ],
           ),
