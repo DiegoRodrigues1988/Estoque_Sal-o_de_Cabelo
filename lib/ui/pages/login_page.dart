@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:estoque_salao_de_cabelo/services/auth_service.dart';
 import 'package:estoque_salao_de_cabelo/ui/pages/home_page.dart';
+import 'package:estoque_salao_de_cabelo/ui/pages/reset_pin_page.dart'; // Importar a nova tela
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -63,6 +64,15 @@ class _LoginPageState extends State<LoginPage> {
               onPressed: _login,
               child: const Text('Entrar'),
             ),
+            const SizedBox(height: 16),
+            // --- NOVO BOTÃO DE RECUPERAÇÃO ---
+            TextButton(
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const ResetPinPage()));
+              },
+              child: const Text('Esqueci meu PIN'),
+            )
           ],
         ),
       ),
