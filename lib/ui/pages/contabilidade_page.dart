@@ -1,20 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart'; // Importar para compartilhar
 import 'package:estoque_salao_de_cabelo/providers/venda_provider.dart';
+import 'package:estoque_salao_de_cabelo/services/export_service.dart'; // Importar o serviço
 import 'package:estoque_salao_de_cabelo/ui/theme/app_theme.dart';
 
 class ContabilidadePage extends StatelessWidget {
   const ContabilidadePage({super.key});
 
-  // --- NOVA FUNÇÃO PARA CONFIRMAR A LIMPEZA ---
+  // Função para exportar os dados da contabilidade
+  Future<void> _exportarContabilidade(BuildContext context) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    scaffoldMessenger.showSnackBar(
+      const SnackBar(content: Text('Gerando arquivo CSV...')),
+    );
+
+    final provider = Provider.of<VendaProvider>(context, listen: false);
+    final exportService = ExportService();
+    final path = await exportService.exportarContabilidadeCsv(provider.vendas);
+
+    scaffoldMessenger.hideCurrentSnackBar();
+    await Share.shareXFiles([XFile(path)], text: 'Relatório de Contabilidade');
+  }
+
+  // Função para confirmar a limpeza do histórico
   void _confirmarLimpeza(BuildContext context) {
+    final provider = Provider.of<VendaProvider>(context, listen: false);
+    final navigator = Navigator.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Confirmar Limpeza'),
         content: const Text(
-            'Tem certeza que deseja apagar todo o histórico de vendas? Esta ação não pode ser desfeita.'),
+            'Tem certeza que deseja apagar todo o histórico de vendas?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -22,14 +41,8 @@ class ContabilidadePage extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              Provider.of<VendaProvider>(context, listen: false)
-                  .limparHistoricoVendas();
-              Navigator.of(ctx).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Histórico de contabilidade limpo!'),
-                    backgroundColor: Colors.green),
-              );
+              provider.limparHistoricoVendas();
+              navigator.pop(); // Usa o navigator guardado
             },
             child:
                 const Text('Limpar Tudo', style: TextStyle(color: Colors.red)),
@@ -47,8 +60,13 @@ class ContabilidadePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Contabilidade'),
-        // --- BOTÃO DE LIMPAR ADICIONADO AQUI ---
         actions: [
+          // --- BOTÃO DE EXPORTAR ADICIONADO AQUI ---
+          IconButton(
+            icon: const Icon(Icons.share_outlined),
+            tooltip: 'Exportar Relatório',
+            onPressed: () => _exportarContabilidade(context),
+          ),
           IconButton(
             icon: const Icon(Icons.cleaning_services_outlined),
             tooltip: 'Limpar histórico',
