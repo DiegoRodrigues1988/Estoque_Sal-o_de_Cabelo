@@ -15,39 +15,33 @@ class ClienteProvider with ChangeNotifier {
 
   void loadClientes() {
     _clientes = _clientesBox.values.toList();
-    // Ordena por nome para melhor visualização
     _clientes
         .sort((a, b) => a.nome.toLowerCase().compareTo(b.nome.toLowerCase()));
     notifyListeners();
   }
 
-  Future<void> addCliente(String nome, String telefone) async {
+  Future<void> addCliente(String nome, String telefone, String? email) async {
     final novoCliente = Cliente(
       id: const Uuid().v4(),
       nome: nome,
       telefone: telefone,
-      ultimaVisita: DateTime.now(),
+      email: email,
     );
     await _clientesBox.put(novoCliente.id, novoCliente);
     loadClientes();
   }
 
   Future<void> updateCliente(
-      Cliente cliente, String nome, String telefone) async {
+      Cliente cliente, String nome, String telefone, String? email) async {
     cliente.nome = nome;
     cliente.telefone = telefone;
+    cliente.email = email;
     await cliente.save();
     loadClientes();
   }
 
   Future<void> deleteCliente(Cliente cliente) async {
     await cliente.delete();
-    loadClientes();
-  }
-
-  Future<void> registrarVisita(Cliente cliente) async {
-    cliente.ultimaVisita = DateTime.now();
-    await cliente.save();
     loadClientes();
   }
 }

@@ -21,13 +21,14 @@ class AgendamentoAdapter extends TypeAdapter<Agendamento> {
       clienteId: fields[1] as String,
       clienteNome: fields[2] as String,
       data: fields[3] as DateTime,
+      status: fields[4] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Agendamento obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class AgendamentoAdapter extends TypeAdapter<Agendamento> {
       ..writeByte(2)
       ..write(obj.clienteNome)
       ..writeByte(3)
-      ..write(obj.data);
+      ..write(obj.data)
+      ..writeByte(4)
+      ..write(obj.status);
   }
 
   @override

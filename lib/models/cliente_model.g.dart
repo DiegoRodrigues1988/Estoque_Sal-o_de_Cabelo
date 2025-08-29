@@ -20,7 +20,7 @@ class ClienteAdapter extends TypeAdapter<Cliente> {
       id: fields[0] as String,
       nome: fields[1] as String,
       telefone: fields[2] as String,
-      ultimaVisita: fields[3] as DateTime,
+      email: fields[3] as String?,
     );
   }
 
@@ -35,7 +35,7 @@ class ClienteAdapter extends TypeAdapter<Cliente> {
       ..writeByte(2)
       ..write(obj.telefone)
       ..writeByte(3)
-      ..write(obj.ultimaVisita);
+      ..write(obj.email);
   }
 
   @override

@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart'; // <-- A CORREÇÃO ESTÁ NESTA LINHA
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
 import 'package:estoque_salao_de_cabelo/models/agendamento_model.dart';
@@ -17,7 +17,7 @@ class AgendamentoProvider with ChangeNotifier {
 
   void loadAgendamentos() {
     _agendamentos = _agendamentosBox.values.toList();
-    _agendamentos.sort((a, b) => a.data.compareTo(b.data)); // Ordena por data
+    _agendamentos.sort((a, b) => a.data.compareTo(b.data));
     notifyListeners();
   }
 
@@ -27,6 +27,7 @@ class AgendamentoProvider with ChangeNotifier {
       clienteId: cliente.id,
       clienteNome: cliente.nome,
       data: data,
+      status: 'agendado', // Status inicial
     );
     await _agendamentosBox.put(novoAgendamento.id, novoAgendamento);
     loadAgendamentos();
@@ -34,6 +35,19 @@ class AgendamentoProvider with ChangeNotifier {
 
   Future<void> deleteAgendamento(Agendamento agendamento) async {
     await agendamento.delete();
+    loadAgendamentos();
+  }
+
+  // --- NOVAS FUNÇÕES DE STATUS ---
+  Future<void> concluirAgendamento(Agendamento agendamento) async {
+    agendamento.status = 'concluido';
+    await agendamento.save();
+    loadAgendamentos();
+  }
+
+  Future<void> cancelarAgendamento(Agendamento agendamento) async {
+    agendamento.status = 'cancelado';
+    await agendamento.save();
     loadAgendamentos();
   }
 }

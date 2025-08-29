@@ -13,13 +13,14 @@ class Cliente extends HiveObject {
   @HiveField(2)
   String telefone;
 
+  // NOVO CAMPO DE EMAIL
   @HiveField(3)
-  DateTime ultimaVisita;
+  String? email; // '?' significa que o email é opcional
 
   Cliente({
     required this.id,
     required this.nome,
     required this.telefone,
-    required this.ultimaVisita,
+    this.email, // Adicionado ao construtor
   });
 }
