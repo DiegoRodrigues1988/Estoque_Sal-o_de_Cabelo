@@ -20,10 +20,12 @@ dependencies:
   uuid: ^4.4.0
   intl: ^0.20.2
   table_calendar: ^3.1.2
-  
   csv: ^6.0.0
   path_provider: ^2.1.3
   share_plus: ^9.0.0
+  
+  # --- PACOTE QUE FALTAVA ---
+  flutter_secure_storage: ^9.0.0
 
 dev_dependencies:
   flutter_test:
@@ -32,11 +34,8 @@ dev_dependencies:
   flutter_lints: ^3.0.0
   hive_generator: ^2.0.1
   build_runner: ^2.4.9
-  
-  # Pacote para gerar os ícones do app
   flutter_launcher_icons: "^0.13.1"
 
-# Nova seção para configurar o pacote de ícones
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
@@ -46,6 +45,5 @@ flutter_launcher_icons:
 flutter:
   uses-material-design: true
   
-  # Nova seção para declarar a pasta de assets
   assets:
     - assets/icons/

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:flutter_localizations/flutter_localizations.dart'; // <-- 1. IMPORTAR
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 // Models
 import 'package:estoque_salao_de_cabelo/models/cliente_model.dart';
@@ -17,7 +17,8 @@ import 'package:estoque_salao_de_cabelo/providers/venda_provider.dart';
 import 'package:estoque_salao_de_cabelo/providers/agendamento_provider.dart';
 
 // UI
-import 'package:estoque_salao_de_cabelo/ui/pages/home_page.dart';
+// A nova porta de entrada do app
+import 'package:estoque_salao_de_cabelo/ui/pages/auth_check_page.dart';
 import 'package:estoque_salao_de_cabelo/ui/theme/app_theme.dart';
 
 void main() async {
@@ -55,7 +56,7 @@ class MyApp extends StatelessWidget {
         title: 'Gestor de Salão',
         theme: AppTheme.themeData,
 
-        // --- 2. ADICIONE ESTAS 4 PROPRIEDADES ---
+        // Configuração de idioma para português
         locale: const Locale('pt', 'BR'),
         supportedLocales: const [
           Locale('pt', 'BR'),
@@ -66,7 +67,10 @@ class MyApp extends StatelessWidget {
           GlobalCupertinoLocalizations.delegate,
         ],
 
-        home: const HomePage(),
+        // --- MUDANÇA PRINCIPAL AQUI ---
+        // A tela inicial agora é a de checagem de autenticação.
+        home: const AuthCheckPage(),
+
         debugShowCheckedModeBanner: false,
       ),
     );
