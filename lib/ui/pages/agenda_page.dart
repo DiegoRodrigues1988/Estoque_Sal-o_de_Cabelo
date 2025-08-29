@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:table_calendar/table_calendar.dart';
+
+// --- IMPORTAÇÕES CORRIGIDAS ---
 import 'package:estoque_salao_de_cabelo/providers/cliente_provider.dart';
 import 'package:estoque_salao_de_cabelo/providers/agendamento_provider.dart';
 import 'package:estoque_salao_de_cabelo/models/cliente_model.dart';
 import 'package:estoque_salao_de_cabelo/models/agendamento_model.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 class AgendaPage extends StatefulWidget {
   const AgendaPage({super.key});
@@ -40,7 +42,7 @@ class _AgendaPageState extends State<AgendaPage> {
       context: context,
       builder: (_) => const _DialogoSelecaoCliente(),
     );
-    if (clienteSelecionado == null) return;
+    if (clienteSelecionado == null || !mounted) return;
 
     final dataSelecionada = await showDatePicker(
       context: context,
@@ -54,7 +56,7 @@ class _AgendaPageState extends State<AgendaPage> {
       context: context,
       initialTime: TimeOfDay.now(),
     );
-    if (horaSelecionada == null) return;
+    if (horaSelecionada == null || !mounted) return;
 
     final dataHoraFinal = DateTime(
       dataSelecionada.year,
@@ -156,11 +158,9 @@ class _AgendaPageState extends State<AgendaPage> {
   }
 
   Widget _buildAgendamentoTile(BuildContext context, Agendamento agendamento) {
-    IconData icon;
-    Color color;
-    // --- CORREÇÃO AQUI ---
-    // A linha abaixo estava errada, faltava o nome da variável "statusText".
-    String statusText;
+    IconData icon = Icons.help_outline;
+    Color color = Colors.grey;
+    String statusText = 'Desconhecido';
 
     switch (agendamento.status) {
       case 'concluido':
@@ -173,7 +173,7 @@ class _AgendaPageState extends State<AgendaPage> {
         color = Colors.grey;
         statusText = 'Cancelado';
         break;
-      default: // 'agendado'
+      case 'agendado':
         icon = Icons.calendar_today;
         color = Colors.green;
         statusText = 'Agendado';

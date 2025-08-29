@@ -11,15 +11,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
-  provider: ^6.1.1
+  provider: ^6.1.2
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   uuid: ^4.4.0
-  intl: ^0.18.1
-  
-  # Pacote adicionado para a funcionalidade de Agenda/Calendário
-  table_calendar: ^3.0.9
+  intl: ^0.20.2
+  table_calendar: ^3.1.2
 
 dev_dependencies:
   flutter_test:
